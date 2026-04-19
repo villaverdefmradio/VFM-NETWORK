@@ -3,19 +3,26 @@ import RadioPlayer from './components/RadioPlayer';
 import Schedule from './components/Schedule';
 import Chat from './components/Chat';
 import Podcasts from './components/Podcasts';
-import { Radio, Menu, Search, Bell } from 'lucide-react';
+import { Radio, Menu, Search, Bell, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { AuthProvider, useAuth } from './lib/AuthContext';
 
-export default function App() {
+function AppContent() {
+  const { user, signIn, logout } = useAuth();
+
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans pb-32">
+    <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans pb-32 transition-colors">
       {/* Header */}
       <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Radio className="text-white w-6 h-6" />
-            </div>
-            <h1 className="text-xl font-black tracking-tighter uppercase italic">Villaverde <span className="text-blue-600">FM</span></h1>
+            <a href="/" className="block">
+              <img 
+                src="https://blogger.googleusercontent.com/img/a/AVvXsEhFzViTA7iJ043hew2QA8KBPHhVkYR5YPGeyg07gGDiRO1KdpTI62nE-Ppq6SXiboslY-mirwFBBdmcEGZOW4-0ecCrLM6KhMvzvTEbWc4U26dMFqtPhPHb7Puk6L_Dx6LSPNy5kBgYCvjvV1jykFfbWCVajRfiFybnUv9m-atfVCYCEP0R1uHHuywuh85j=s465"
+                alt="Villaverde FM Logo"
+                className="h-10 md:h-12 w-auto object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </a>
           </div>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-wider">
@@ -25,14 +32,43 @@ export default function App() {
             <a href="#" className="hover:text-blue-600 transition-colors">Contacto</a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <button className="hidden sm:block p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors font-bold text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+              {/* Extra action placeholder */}
+            </button>
             <button className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
               <Search className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-900" />
-            </button>
+            
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt={user.displayName || ''} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center">
+                      <UserIcon className="w-4 h-4 text-zinc-500" />
+                    </div>
+                  )}
+                </div>
+                <button 
+                  onClick={logout}
+                  className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-full transition-colors"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={signIn}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors shadow-lg shadow-blue-500/20"
+              >
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:inline">Entrar</span>
+              </button>
+            )}
+
             <button className="md:hidden p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
               <Menu className="w-5 h-5" />
             </button>
@@ -79,5 +115,13 @@ export default function App() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

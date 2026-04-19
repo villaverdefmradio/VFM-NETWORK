@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A message sent by a listener in the live chat",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content of the message"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "The UID of the sender"
+        },
+        "senderName": {
+          "type": "string",
+          "description": "The display name of the sender at the time of sending"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the message was created"
+        }
+      },
+      "required": ["text", "senderId", "senderName", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Publicly accessible information about a user",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The user's preferred display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL to the user's avatar image"
+        }
+      },
+      "required": ["displayName"]
+    }
+  },
+  "firestore": {
+    "/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Live chat history across the station"
+    },
+    "/users/{userId}/public/profile": {
+      "schema": "UserProfile",
+      "description": "Public profile data for a user"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened global helpers
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isVerifiedUser() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    // Validation for ChatMessage
+    function isValidChatMessage(data) {
+      return data.keys().hasAll(['text', 'senderId', 'senderName', 'createdAt'])
+        && data.keys().size() == 4
+        && data.text is string && data.text.size() > 0 && data.text.size() <= 500
+        && data.senderId == request.auth.uid
+        && data.senderName is string && data.senderName.size() <= 50
+        && data.createdAt == request.time;
+    }
+
+    // Validation for UserProfile
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['displayName'])
+        && (data.keys().size() >= 1 && data.keys().size() <= 2)
+        && data.displayName is string && data.displayName.size() >= 2 && data.displayName.size() <= 32
+        && (!data.keys().hasAny(['photoURL']) || (data.photoURL is string && data.photoURL.size() <= 1024));
+    }
+
+    // Collection: messages
+    match /messages/{messageId} {
+      allow get: if isSignedIn();
+      // Enforce query security via rule-side evaluate resource.data to prevent unprotected list access
+      allow list: if isSignedIn() && resource.data.createdAt <= request.time;
+      allow create: if isVerifiedUser() && isValidId(messageId) && isValidChatMessage(incoming());
+      // Chat messages are immutable
+    }
+
+    // Collection: users
+    match /users/{userId} {
+      // Allow get of user root if signed in
+      allow get: if isSignedIn() && isValidId(userId);
+      
+      match /public/profile {
+        allow get: if isSignedIn();
+        // Owners can set their only profile
+        allow create: if isVerifiedUser() && isOwner(userId) && isValidUserProfile(incoming());
+        allow update: if isVerifiedUser() && isOwner(userId) && isValidUserProfile(incoming())
+          // Action-Based Update: standard profile update
+          && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL']);
+      }
+    }
+  }
+}
