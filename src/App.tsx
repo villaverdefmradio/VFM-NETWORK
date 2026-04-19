@@ -10,7 +10,7 @@ function AppContent() {
   const { user, signIn, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans pb-32 transition-colors">
+    <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans pb-60 transition-colors">
       {/* Header */}
       <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -109,10 +109,8 @@ function AppContent() {
       </main>
 
       {/* Floating Radio Player */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 pointer-events-none">
-        <div className="pointer-events-auto">
-          <RadioPlayer />
-        </div>
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <RadioPlayer />
       </div>
     </div>
   );

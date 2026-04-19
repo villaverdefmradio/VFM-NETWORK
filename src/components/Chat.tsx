@@ -54,7 +54,7 @@ export default function Chat() {
   }, [values]);
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 flex flex-col h-[500px] overflow-hidden">
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 flex flex-col h-[600px] overflow-hidden sticky top-24">
       <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm z-10">
         <MessageSquare className="w-5 h-5 text-purple-500" />
         <h2 className="font-bold text-lg">Chat en Vivo</h2>
