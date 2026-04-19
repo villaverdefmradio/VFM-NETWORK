@@ -28,7 +28,11 @@ export default function Chat() {
 
   const messagesRef = collection(db, 'messages');
   const q = query(messagesRef, orderBy('createdAt', 'asc'), limit(50));
-  const [values, loading, error] = useCollectionData(q);
+  const [values, loading, error] = useCollectionData(q, { idField: 'id' } as any);
+
+  useEffect(() => {
+    if (error) console.error("Firestore Chat Error:", error);
+  }, [error]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +58,7 @@ export default function Chat() {
   }, [values]);
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 flex flex-col h-[600px] overflow-hidden sticky top-24">
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 flex flex-col h-[600px] overflow-hidden">
       <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm z-10">
         <MessageSquare className="w-5 h-5 text-purple-500" />
         <h2 className="font-bold text-lg">Chat en Vivo</h2>
@@ -86,13 +90,13 @@ export default function Chat() {
           </div>
         )}
 
-        {values?.map((msg, index) => {
+        {values?.map((msg: any) => {
           const isMe = user && msg.senderId === user.uid;
-          const date = msg.createdAt?.toDate();
+          const date = msg.createdAt?.toDate?.() || null;
           const time = date ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...';
 
           return (
-            <div key={index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+            <div key={msg.id || Math.random()} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               <div className={`flex items-center gap-2 mb-1 ${isMe ? 'flex-row-reverse' : ''}`}>
                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
                   {msg.senderName}

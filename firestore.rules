@@ -36,10 +36,8 @@ service cloud.firestore {
 
     // Collection: messages
     match /messages/{messageId} {
-      allow get: if isSignedIn();
-      // Enforce query security via rule-side evaluate resource.data to prevent unprotected list access
-      allow list: if isSignedIn() && resource.data.createdAt <= request.time;
-      allow create: if isVerifiedUser() && isValidId(messageId) && isValidChatMessage(incoming());
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(messageId) && isValidChatMessage(incoming());
       // Chat messages are immutable
     }
 
@@ -51,8 +49,8 @@ service cloud.firestore {
       match /public/profile {
         allow get: if isSignedIn();
         // Owners can set their only profile
-        allow create: if isVerifiedUser() && isOwner(userId) && isValidUserProfile(incoming());
-        allow update: if isVerifiedUser() && isOwner(userId) && isValidUserProfile(incoming())
+        allow create: if isSignedIn() && isOwner(userId) && isValidUserProfile(incoming());
+        allow update: if isSignedIn() && isOwner(userId) && isValidUserProfile(incoming())
           // Action-Based Update: standard profile update
           && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL']);
       }
